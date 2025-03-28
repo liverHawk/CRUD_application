@@ -5,3 +5,15 @@ services:
       - ./:/app
     ports:
       - 8080:8080
+  
+  db:
+    image: postgres:latest
+    volumes:
+      - gin_db:/var/lib/postgresql
+    environment:
+      POSTGRES_USER: "user"
+      POSTGRES_PASSWORD: "postgres"
+      POSTGRES_DB: "crud"
+
+volumes:
+  gin_db:
