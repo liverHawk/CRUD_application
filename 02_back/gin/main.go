@@ -1,12 +1,13 @@
 package main
 
 import (
-	"log"
 	"fmt"
+	"log"
+
 	"github.com/gin-gonic/gin"
+	"gorm.io/driver/postgres"
 	"gorm.io/gen"
 	"gorm.io/gorm"
-	"gorm.io/driver/postgres"
 
 	"project/orm/model"
 )
@@ -15,10 +16,21 @@ type Querier interface {
 	FilterWithNameAndRole(name, role string) ([]gen.T, error)
 }
 
+func setupRouter() *gin.Engine {
+	router := gin.Default()
+	router.GET("/ping", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"message": "pong",
+		})
+	})
+
+	return router
+}
+
 func main() {
 	g := gen.NewGenerator(gen.Config{
 		OutPath: "./query",
-		Mode: gen.WithoutContext|gen.WithDefaultQuery|gen.WithQueryInterface,
+		Mode:    gen.WithoutContext | gen.WithDefaultQuery | gen.WithQueryInterface,
 	})
 
 	dsn := "host=db user=user password=postgres dbname=crud port=5432 sslmode=disable TimeZone=Asia/Tokyo"
@@ -35,16 +47,11 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("migration: ok") 
+	fmt.Println("migration: ok")
 
 	g.UseDB(db)
 
-	router := gin.Default()
-	router.GET("/ping", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "pong",
-		})
-	})
+	router := setupRouter()
 
 	router.Run()
 }
