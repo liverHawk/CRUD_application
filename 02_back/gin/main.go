@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 	"log"
+	"project/route"
 
-	"github.com/gin-gonic/gin"
 	"gorm.io/driver/postgres"
 	"gorm.io/gen"
 	"gorm.io/gorm"
@@ -14,17 +14,6 @@ import (
 
 type Querier interface {
 	FilterWithNameAndRole(name, role string) ([]gen.T, error)
-}
-
-func setupRouter() *gin.Engine {
-	router := gin.Default()
-	router.GET("/ping", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "pong",
-		})
-	})
-
-	return router
 }
 
 func main() {
@@ -51,7 +40,8 @@ func main() {
 
 	g.UseDB(db)
 
-	router := setupRouter()
+	router := route.SetupRouter()
+	router = route.PostUser(router)
 
 	router.Run()
 }
