@@ -10,8 +10,9 @@ services:
     image: postgres:latest
     volumes:
       - gin_db:/var/lib/postgresql
+      - ../00_db/init.sql:/docker-entrypoint-initdb.d/init.sql
     environment:
-      POSTGRES_USER: "user"
+      POSTGRES_USER: "crud_user"
       POSTGRES_PASSWORD: "postgres"
       POSTGRES_DB: "crud"
 

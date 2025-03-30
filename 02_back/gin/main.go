@@ -22,7 +22,7 @@ func main() {
 		Mode:    gen.WithoutContext | gen.WithDefaultQuery | gen.WithQueryInterface,
 	})
 
-	dsn := "host=db user=user password=postgres dbname=crud port=5432 sslmode=disable TimeZone=Asia/Tokyo"
+	dsn := "host=db user=crud_user password=postgres dbname=crud port=5432 sslmode=disable TimeZone=Asia/Tokyo"
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatal(err)
@@ -40,8 +40,12 @@ func main() {
 
 	g.UseDB(db)
 
+	h := route.Handler{
+		DB: db,
+	}
+
 	router := route.SetupRouter()
-	router = route.PostUser(router)
+	router = h.PostUser(router)
 
 	router.Run()
 }
