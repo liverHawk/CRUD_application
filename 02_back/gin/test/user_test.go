@@ -13,6 +13,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -20,6 +21,11 @@ func TestPostUser(t *testing.T) {
 	driverName := fmt.Sprintf("test_post_user_%d", time.Now().UnixNano())
 
 	db, _ := util.NewTestDB(driverName)
+	defer func() {
+		sqlDB, _ := db.DB()
+		sqlDB.Close()
+	}()
+
 	h := route.Handler{
 		DB: db,
 	}
@@ -45,26 +51,43 @@ func TestPostUser(t *testing.T) {
 	assert.NotZero(t, responseUser.ID, "ID should not be zero")
 }
 
+func postUser(u *model.User, r *gin.Engine) *model.User {
+	body, _ := json.Marshal(u)
+	req, _ := http.NewRequest("POST", "/user/add", strings.NewReader(string(body)))
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	var responseUser model.User
+	err := json.Unmarshal(w.Body.Bytes(), &responseUser)
+	if err != nil {
+		return nil
+	}
+	return &responseUser
+}
+
 func TestGetUser(t *testing.T) {
 	driverName := fmt.Sprintf("test_post_user_%d", time.Now().UnixNano())
 
 	db, _ := util.NewTestDB(driverName)
+	defer func() {
+		sqlDB, _ := db.DB()
+		sqlDB.Close()
+	}()
 	h := route.Handler{
 		DB: db,
 	}
 
 	router := route.SetupRouter()
 	router = h.GetUser(router)
+	router = h.PostUser(router)
 
 	w := httptest.NewRecorder()
 
 	exampleUser := model.User{
 		Username: "exampleUser",
 	}
-	db.Create(&exampleUser)
-	// get user ID from the database
 	var createdUser model.User
-	db.First(&createdUser, exampleUser.Username)
+	createdUser = *postUser(&exampleUser, router)
 
 	req, _ := http.NewRequest("GET", "/user/"+strconv.FormatUint(uint64(createdUser.ID), 10), nil)
 	router.ServeHTTP(w, req)
@@ -81,6 +104,10 @@ func TestUpdateUser(t *testing.T) {
 	driverName := fmt.Sprintf("test_post_user_%d", time.Now().UnixNano())
 
 	db, _ := util.NewTestDB(driverName)
+	defer func() {
+		sqlDB, _ := db.DB()
+		sqlDB.Close()
+	}()
 	h := route.Handler{
 		DB: db,
 	}
@@ -88,15 +115,15 @@ func TestUpdateUser(t *testing.T) {
 	router := route.SetupRouter()
 	router = h.UpdateUser(router)
 
+	router = h.PostUser(router)
+
 	w := httptest.NewRecorder()
 
 	exampleUser := model.User{
 		Username: "exampleUser",
 	}
-	db.Create(&exampleUser)
-	// get user ID from the database
 	var createdUser model.User
-	db.First(&createdUser, exampleUser.Username)
+	createdUser = *postUser(&exampleUser, router)
 
 	reqBody := `{"username": "updatedUser"}`
 	req, _ := http.NewRequest("PUT", "/user/update/"+strconv.FormatUint(uint64(createdUser.ID), 10), strings.NewReader(reqBody))
@@ -113,6 +140,10 @@ func TestDeleteUser(t *testing.T) {
 	driverName := fmt.Sprintf("test_post_user_%d", time.Now().UnixNano())
 
 	db, _ := util.NewTestDB(driverName)
+	defer func() {
+		sqlDB, _ := db.DB()
+		sqlDB.Close()
+	}()
 	h := route.Handler{
 		DB: db,
 	}
@@ -120,15 +151,15 @@ func TestDeleteUser(t *testing.T) {
 	router := route.SetupRouter()
 	router = h.DeleteUser(router)
 
+	router = h.PostUser(router)
+
 	w := httptest.NewRecorder()
 
 	exampleUser := model.User{
 		Username: "exampleUser",
 	}
-	db.Create(&exampleUser)
-	// get user ID from the database
 	var createdUser model.User
-	db.First(&createdUser, exampleUser.Username)
+	createdUser = *postUser(&exampleUser, router)
 
 	req, _ := http.NewRequest("DELETE", "/user/delete/"+strconv.FormatUint(uint64(createdUser.ID), 10), nil)
 	router.ServeHTTP(w, req)
