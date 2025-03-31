@@ -63,3 +63,12 @@ func (h *Handler) DeleteUser(r *gin.Engine) *gin.Engine {
 	})
 	return r
 }
+
+func (h *Handler) UserRoutes(r *gin.Engine) *gin.Engine {
+	r = h.PostUser(r)
+	r = h.GetUser(r)
+	r = h.UpdateUser(r)
+	r = h.DeleteUser(r)
+
+	return r
+}

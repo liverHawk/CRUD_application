@@ -46,10 +46,7 @@ func main() {
 
 	router := route.SetupRouter()
 
-	router = h.PostUser(router)
-	router = h.GetUser(router)
-	router = h.UpdateUser(router)
-	router = h.DeleteUser(router)
+	router = h.UserRoutes(router)
 
 	router.Run()
 }
