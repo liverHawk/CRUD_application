@@ -31,7 +31,8 @@ func GetUser(db *gorm.DB, u *User, id string) int {
 }
 
 func UpdateUser(db *gorm.DB, u *User, id string) int {
-	exist := db.First(&u, id)
+	var user User
+	exist := db.First(&user, id)
 	if exist.Error != nil {
 		return 500
 	}
