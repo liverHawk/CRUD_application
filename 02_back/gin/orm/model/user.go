@@ -55,3 +55,14 @@ func DeleteUser(db *gorm.DB, id string) int {
 		return 200
 	}
 }
+
+func ExistUser(db *gorm.DB, id string) bool {
+	var user User
+	result := db.First(&user, id)
+
+	if result.Error != nil {
+		return false
+	} else {
+		return true
+	}
+}
