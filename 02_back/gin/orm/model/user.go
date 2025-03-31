@@ -28,3 +28,13 @@ func GetUser(db *gorm.DB, u *User, id string) int {
 		return 200
 	}
 }
+
+func UpdateUser(db *gorm.DB, u *User, id string) int {
+	result := db.Model(&User{}).Where("id = ?", id).Updates(u)
+
+	if result.Error != nil {
+		return 500
+	} else {
+		return 200
+	}
+}

@@ -46,7 +46,9 @@ func (h *Handler) UpdateUser(r *gin.Engine) *gin.Engine {
 			c.JSON(400, gin.H{"error": "Invalid input"})
 			return
 		}
-		if err := h.DB.Model(&model.User{}).Where("id = ?", id).Updates(user).Error; err != nil {
+
+		statusCode := model.UpdateUser(h.DB, &user, id)
+		if statusCode == 500 {
 			c.JSON(500, gin.H{"error": "Failed to update user"})
 			return
 		}
