@@ -41,6 +41,11 @@ func (h *Handler) GetUser(r *gin.Engine) *gin.Engine {
 func (h *Handler) UpdateUser(r *gin.Engine) *gin.Engine {
 	r.PUT("/user/update/:id", func(c *gin.Context) {
 		id := c.Param("id")
+
+		if !model.ExistUser(h.DB, id) {
+			c.JSON(404, gin.H{"error": "User not found"})
+			return
+		}
 		var user model.User
 		if err := c.ShouldBindJSON(&user); err != nil {
 			c.JSON(400, gin.H{"error": "Invalid input"})

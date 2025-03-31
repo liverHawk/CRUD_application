@@ -3,6 +3,7 @@ package test
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"project/orm/model"
@@ -15,6 +16,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
+	"gorm.io/gorm"
 )
 
 func TestPostUser(t *testing.T) {
@@ -65,6 +67,13 @@ func postUser(u *model.User, r *gin.Engine) *model.User {
 	return &responseUser
 }
 
+func createUser(db *gorm.DB, u *model.User) *model.User {
+	if err := db.Create(u).Error; err != nil {
+		return nil
+	}
+	return u
+}
+
 func TestGetUser(t *testing.T) {
 	driverName := fmt.Sprintf("test_post_user_%d", time.Now().UnixNano())
 
@@ -113,9 +122,8 @@ func TestUpdateUser(t *testing.T) {
 	}
 
 	router := route.SetupRouter()
+	// otherRouter := h.PostUser(router)
 	router = h.UpdateUser(router)
-
-	router = h.PostUser(router)
 
 	w := httptest.NewRecorder()
 
@@ -123,13 +131,20 @@ func TestUpdateUser(t *testing.T) {
 		Username: "exampleUser",
 	}
 	var createdUser model.User
-	createdUser = *postUser(&exampleUser, router)
+	// createdUser = *postUser(&exampleUser, otherRouter)
+	createdUser = *createUser(db, &exampleUser)
 
-	reqBody := `{"username": "updatedUser"}`
-	req, _ := http.NewRequest("PUT", "/user/update/"+strconv.FormatUint(uint64(createdUser.ID), 10), strings.NewReader(reqBody))
+	time.Sleep(50 * time.Millisecond)
+
+	reqBody := model.User{
+		Username: "updatedUser",
+	}
+	reqBodyJson, _ := json.Marshal(reqBody)
+	req, _ := http.NewRequest("PUT", "/user/update/"+strconv.FormatUint(uint64(createdUser.ID), 10), strings.NewReader(string(reqBodyJson)))
 	router.ServeHTTP(w, req)
 
 	var responseUser model.User
+	log.Println(w.Body.String())
 	err := json.Unmarshal(w.Body.Bytes(), &responseUser)
 	assert.NoError(t, err, "Failed to unmarshal response")
 	assert.Equal(t, http.StatusOK, w.Code)
