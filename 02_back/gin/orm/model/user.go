@@ -18,3 +18,13 @@ func CreateUser(db *gorm.DB, u *User) int {
 		return 200
 	}
 }
+
+func GetUser(db *gorm.DB, u *User, id string) int {
+	result := db.First(&u, id)
+
+	if result.Error != nil {
+		return 500
+	} else {
+		return 200
+	}
+}

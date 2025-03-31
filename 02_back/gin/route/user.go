@@ -27,11 +27,14 @@ func (h *Handler) GetUser(r *gin.Engine) *gin.Engine {
 	r.GET("/user/:id", func(c *gin.Context) {
 		id := c.Param("id")
 		var user model.User
-		if err := h.DB.First(&user, id).Error; err != nil {
-			c.JSON(404, gin.H{"error": "User not found"})
+
+		var statusCode = model.GetUser(h.DB, &user, id)
+		if statusCode == 500 {
+			c.JSON(500, gin.H{"error": "Failed to get user"})
 			return
+		} else {
+			c.JSON(200, user)
 		}
-		c.JSON(200, user)
 	})
 	return r
 }
