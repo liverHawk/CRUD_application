@@ -47,6 +47,7 @@ func main() {
 	router := route.SetupRouter()
 
 	router = h.UserRoutes(router)
+	router = h.ArticleRoutes(router)
 
 	router.Run()
 }
