@@ -32,9 +32,8 @@ func (h *Handler) GetUser(r *gin.Engine) *gin.Engine {
 		if statusCode == 500 {
 			c.JSON(500, gin.H{"error": "Failed to get user"})
 			return
-		} else {
-			c.JSON(200, user)
 		}
+		c.JSON(200, user)
 	})
 	return r
 }
