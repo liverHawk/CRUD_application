@@ -60,7 +60,9 @@ func (h *Handler) UpdateUser(r *gin.Engine) *gin.Engine {
 func (h *Handler) DeleteUser(r *gin.Engine) *gin.Engine {
 	r.DELETE("/user/delete/:id", func(c *gin.Context) {
 		id := c.Param("id")
-		if err := h.DB.Delete(&model.User{}, id).Error; err != nil {
+
+		statusCode := model.DeleteUser(h.DB, id)
+		if statusCode == 500 {
 			c.JSON(500, gin.H{"error": "Failed to delete user"})
 			return
 		}

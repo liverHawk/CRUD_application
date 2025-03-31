@@ -38,3 +38,13 @@ func UpdateUser(db *gorm.DB, u *User, id string) int {
 		return 200
 	}
 }
+
+func DeleteUser(db *gorm.DB, id string) int {
+	result := db.Delete(&User{}, id)
+
+	if result.Error != nil {
+		return 500
+	} else {
+		return 200
+	}
+}
