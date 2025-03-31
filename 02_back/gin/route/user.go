@@ -13,7 +13,8 @@ func (h *Handler) PostUser(r *gin.Engine) *gin.Engine {
 			c.JSON(400, gin.H{"error": "Invalid input"})
 			return
 		}
-		if err := h.DB.Create(&user).Error; err != nil {
+		statusCode := model.CreateUser(h.DB, &user)
+		if statusCode == 500 {
 			c.JSON(500, gin.H{"error": "Failed to create user"})
 			return
 		}
