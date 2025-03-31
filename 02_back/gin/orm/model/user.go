@@ -7,6 +7,7 @@ import (
 type User struct {
 	gorm.Model
 	Username string
+	articles []Article `gorm:"foreignKey:AuthorID"` // 1 vs many
 }
 
 func CreateUser(db *gorm.DB, u *User) int {
@@ -30,11 +31,12 @@ func GetUser(db *gorm.DB, u *User, id string) int {
 }
 
 func UpdateUser(db *gorm.DB, u *User, id string) int {
-	result := db.Model(&User{}).Where("id = ?", id).Updates(u)
+	result := db.Model(&u).Preload("articles").Where("id = ?", id).Updates(u)
 
 	if result.Error != nil {
 		return 500
 	} else {
+		_ = GetUser(db, u, id)
 		return 200
 	}
 }
