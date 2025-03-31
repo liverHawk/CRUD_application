@@ -30,6 +30,12 @@ func GetUser(db *gorm.DB, u *User, id string) int {
 }
 
 func UpdateUser(db *gorm.DB, u *User, id string) int {
+	var user User
+	exist := db.First(user, id)
+	if exist.Error != nil {
+		return 500
+	}
+
 	result := db.Model(&User{}).Where("id = ?", id).Updates(u)
 
 	if result.Error != nil {
